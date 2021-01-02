@@ -1,50 +1,53 @@
-from datetime import datetime
-from typing import Union
 import abc
-
-from pandas import DataFrame
-
-
-class ReturnCalculator(abc.ABC):
-    @abc.abstractmethod
-    def calculate_return(self, porfolio_data: DataFrame) -> Union[int, float]:
-        pass
+from datetime import datetime
+from typing import Union, List
 
 
 class InvestmentPortfolio:
     def __init__(self,
-                 total_deposited: Union[int, float],
-                 current_portfolio_value: Union[int, float],
-                 percentage_return: Union[int, float],
-                 portfolio_data: DataFrame):
+                 total_deposited: Union[int, float] = None,
+                 current_portfolio_value: Union[int, float] = None,
+                 portfolio_data: List[dict] = None):
         """
         To complete
         """
-        self.total_deposited = total_deposited
-        self.current_portfolio_value = current_portfolio_value
-        self.percentage_return = percentage_return
-        self.portfolio_data = portfolio_data
+        self.total_deposited = total_deposited or 0
+        self.current_portfolio_value = current_portfolio_value or 0
+        self.portfolio_data = portfolio_data or []
 
     def deposit(self,
-                amount: Union[int, float],
-                current_portfolio_value: Union[int, float] = None,
+                deposit_amount: Union[int, float],
                 date: datetime = None):
         # Make a deposit
-        self.total_deposited += amount
-        if current_portfolio_value:
-            self.current_portfolio_value = current_portfolio_value
-        if date is None:
-            data = datetime.now()
+        self.total_deposited += deposit_amount
+        self.current_portfolio_value += deposit_amount
+        date = date or datetime.now()
 
-    def calculate_return(self):
-        # Calculate the percentage_return of the current portfolio
-        pass
+        # Update the portfolio_data
+        self._update_portfolio_data(date)
 
-    def print_porfolio_breakdown(self):
-        # Print a breakdown of the current portfolio
-        pass
+    def update_current_portfolio_value(self, current_portfolio_value: Union[int, float],
+                                       date: datetime = None):
+        # Update the total value of the assets in the portfolio
+        self.current_portfolio_value = current_portfolio_value
+        date = date or datetime.now()
 
-    def _update_portfolio_data(self):
+        # Update the portfolio_data
+        self._update_portfolio_data(date)
+
+    def _update_portfolio_data(self, date):
         # Update the portfolio data
-        df = self.portfolio_data
+        new_entry = {
+            'date': date,
+            'total_deposited': self.total_deposited,
+            'current_portfolio_value': self.current_portfolio_value
+        }
+        self.portfolio_data.append(new_entry)
+        pass
+
+
+class ReturnCalculator(abc.ABC):
+    """ Consider putting this class in new file """
+    @abc.abstractmethod
+    def calculate_return(self, portfolio: InvestmentPortfolio) -> Union[int, float]:
         pass
