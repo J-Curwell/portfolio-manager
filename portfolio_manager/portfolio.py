@@ -26,9 +26,20 @@ class InvestmentPortfolio:
         # Update the portfolio_data
         self._update_portfolio_data(date)
 
-    def update_current_portfolio_value(self, current_portfolio_value: Union[int, float],
-                                       date: datetime = None):
-        # Update the total value of the assets in the portfolio
+    def withdraw(self,
+                 withdrawal_amount: Union[int, float],
+                 date: datetime = None):
+        # Make a withdrawal
+        self.total_deposited -= withdrawal_amount
+        self.current_portfolio_value -= withdrawal_amount
+        date = date or datetime.now()
+
+        # Update the portfolio_data
+        self._update_portfolio_data(date)
+
+    def update_portfolio_value(self, current_portfolio_value: Union[int, float],
+                               date: datetime = None):
+        # Update the current total value of the assets in the portfolio
         self.current_portfolio_value = current_portfolio_value
         date = date or datetime.now()
 
@@ -47,7 +58,7 @@ class InvestmentPortfolio:
 
 
 class ReturnCalculator(abc.ABC):
-    """ Consider putting this class in new file """
+    """ Consider putting this class in a different module """
     @abc.abstractmethod
     def calculate_return(self, portfolio: InvestmentPortfolio) -> Union[int, float]:
         pass
