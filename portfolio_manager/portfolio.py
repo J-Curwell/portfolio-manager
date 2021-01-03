@@ -1,10 +1,11 @@
-import abc
+import pickle
 from datetime import datetime
-from typing import Union, List, Any
+from typing import Union, List
 
 
 class InvestmentPortfolio:
     def __init__(self,
+                 name: str = None,
                  total_deposited: Union[int, float] = None,
                  current_portfolio_value: Union[int, float] = None,
                  portfolio_history: List[dict] = None):
@@ -15,6 +16,8 @@ class InvestmentPortfolio:
 
         Parameters
         ----------
+        name : str
+            The name of the portfolio. Defaults to 'portfolio_{today's date}'.
         total_deposited : Union[int, float]
             The total amount that has been invested into the portfolio. i.e. the sum of
             each individual deposit.
@@ -23,8 +26,10 @@ class InvestmentPortfolio:
         portfolio_history : List[dict]
             Stores historical portfolio data by saving a snapshot of the portfolio each
             time it is updated. Each snapshot is a dictionary with keys 'date',
-            'total_deposited' and 'current_portfolio_value'.
+            'total_deposited', 'current_portfolio_value' and 'transaction_type'.
         """
+        date_today = datetime.now().strftime('%d%m%Y')
+        self.name = name or f'portfolio_{date_today}'
         self.total_deposited = total_deposited or 0
         self.current_portfolio_value = current_portfolio_value or 0
         self.portfolio_history = portfolio_history or []
@@ -48,7 +53,7 @@ class InvestmentPortfolio:
         date = date or datetime.now()
 
         # Update portfolio_history
-        self._update_portfolio_history(date)
+        self._update_portfolio_history(date, 'deposit')
 
     def withdraw(self,
                  withdrawal_amount: Union[int, float],
@@ -69,7 +74,7 @@ class InvestmentPortfolio:
         date = date or datetime.now()
 
         # Update portfolio_history
-        self._update_portfolio_history(date)
+        self._update_portfolio_history(date, 'withdrawal')
 
     def update_portfolio_value(self, current_portfolio_value: Union[int, float],
                                date: datetime = None):
@@ -88,9 +93,9 @@ class InvestmentPortfolio:
         date = date or datetime.now()
 
         # Update portfolio_history
-        self._update_portfolio_history(date)
+        self._update_portfolio_history(date, 'update_portfolio_value')
 
-    def _update_portfolio_history(self, date: datetime):
+    def _update_portfolio_history(self, date: datetime, transaction_type: str):
         """
         Add a snapshot of the current portfolio to portfolio_history.
 
@@ -98,18 +103,30 @@ class InvestmentPortfolio:
         ----------
         date : datetime
             The date at which the portfolio snapshot was taken.
+        transaction_type : str
+            The type of transaction that was made before taking the portfolio snapshot.
         """
         # Update portfolio_history
         new_entry = {
             'date': date,
             'total_deposited': self.total_deposited,
-            'current_portfolio_value': self.current_portfolio_value
+            'current_portfolio_value': self.current_portfolio_value,
+            'transaction_type': transaction_type
         }
         self.portfolio_history.append(new_entry)
 
+    def save_portfolio(self, directory: str = None):
+        """ To complete """
+        path = f'{directory}/{self.name}.pkl' if directory else f'{self.name}.pkl'
 
-class ReturnCalculator(abc.ABC):
-    """ Consider putting this class in a different module """
-    @abc.abstractmethod
-    def calculate_return(self, portfolio: InvestmentPortfolio) -> Any:
-        pass
+        # Save the portfolio, overwriting any existing files at that path.
+        with open(path, 'wb') as handle:
+            pickle.dump(self, handle, pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def load_portfolio(path: str = None):
+        """ To complete """
+        # Load the portfolio
+        with open(path, 'rb') as handle:
+            portfolio = pickle.load(handle)
+        return portfolio
