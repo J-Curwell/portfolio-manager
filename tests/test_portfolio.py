@@ -24,7 +24,7 @@ class InvestmentPortfolioTests(unittest.TestCase):
         self.assertEqual(22.5, self.test_portfolio.current_portfolio_value)
 
         # Deposit a further £27.50 using the default datetime. To avoid time issues, we
-        # patch the value of the default datetime.now()
+        # patch the value of the default datetime, which is datetime.now()
         with mock.patch('portfolio_manager.portfolio.datetime') as mock_datetime:
             mock_datetime.now.return_value = datetime(2021, 2, 1)
             self.test_portfolio.deposit(27.5)
