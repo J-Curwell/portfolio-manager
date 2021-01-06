@@ -116,7 +116,12 @@ class InvestmentPortfolio:
         self.portfolio_history.append(new_entry)
 
     def save_portfolio(self, directory: str = None):
-        """ To complete """
+        """
+        Save the state of a portfolio
+
+        ...
+
+        """
         path = f'{directory}/{self.name}.pkl' if directory else f'{self.name}.pkl'
 
         # Save the portfolio, overwriting any existing files at that path.
