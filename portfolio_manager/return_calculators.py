@@ -24,7 +24,7 @@ class StandardReturnCalculator(ReturnCalculator):
     Calculate the percentage return of the portfolio using the following formula:
 
     ((current portfolio value - total amount deposited) / total amount deposited) * 100
-    
+
     ...
 
     """
