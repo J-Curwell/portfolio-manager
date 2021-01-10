@@ -43,6 +43,15 @@ class InvestmentPortfolioTests(unittest.TestCase):
         self.assertListEqual(expected_transaction_history,
                              self.test_portfolio.portfolio_history)
 
+    # def test_withdraw(self):
+    #     pass
+    #
+    # def test_update_portfolio_value(self):
+    #     pass
+    #
+    # def test_save_portfolio(self):
+    #     pass
+
 
 if __name__ == "__main__":
     unittest.main()
