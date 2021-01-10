@@ -29,9 +29,9 @@ class InvestmentPortfolioTests(unittest.TestCase):
         # patch the value of the default datetime, which is datetime.now()
         with mock.patch('portfolio_manager.portfolio.datetime') as mock_datetime:
             mock_datetime.now.return_value = datetime(2021, 2, 1)
-            self.test_portfolio.deposit(27.5)
+            self.test_portfolio.deposit(27.5, 25)
         self.assertEqual(50, self.test_portfolio.total_deposited)
-        self.assertEqual(50, self.test_portfolio.current_portfolio_value)
+        self.assertEqual(52.5, self.test_portfolio.current_portfolio_value)
 
         # Check the two deposits were successfully recorded
         expected_transaction_history = [{'date': past,
@@ -40,7 +40,7 @@ class InvestmentPortfolioTests(unittest.TestCase):
                                          'transaction_type': 'deposit'},
                                         {'date': datetime(2021, 2, 1),
                                          'total_deposited': 50,
-                                         'current_portfolio_value': 50,
+                                         'current_portfolio_value': 52.5,
                                          'transaction_type': 'deposit'}]
         self.assertListEqual(expected_transaction_history,
                              self.test_portfolio.portfolio_history)
