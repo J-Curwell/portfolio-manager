@@ -45,23 +45,28 @@ class TimeWeightedReturnCalculator(ReturnCalculator):
     """ To complete """
     def calculate_return(self, portfolio: InvestmentPortfolio,
                          annualised: bool = True) -> Any:
-        HP = []
+        sub_period_returns = []
         sorted_portfolio_history = sorted(portfolio.portfolio_history, key=lambda k: k['date'])
         if len(sorted_portfolio_history) <= 1:
-            twr_return_percentage=0
+            twr_return_percentage = 0
         else:
             for i in range(len(sorted_portfolio_history) - 1):
                 total_deposited = sorted_portfolio_history[i]['total_deposited']
                 if total_deposited != sorted_portfolio_history[i+1]['total_deposited']:
                     cash_flow = sorted_portfolio_history[i+1]['total_deposited'] - sorted_portfolio_history[i]['total_deposited']
                     end_value = sorted_portfolio_history[i+1]['current_portfolio_value'] - cash_flow
+                    value_before_deposit = sorted_portfolio_history[i]['current_portfolio_value']
+                    return_for_period = (end_value - value_before_deposit + cash_flow) / (value_before_deposit + cash_flow)
+                    # return_for_period = (sorted_portfolio_history[i+1]['current_portfolio_value']-end_value + cash_flow)/(end_value+cash_flow)
+                    sub_period_returns.append(1 + return_for_period)
+
 
                 # inital_value = sorted_portfolio_history[i]['current_portfolio_value']
                 # end_value = sorted_portfolio_history[i+1]['current_portfolio_value']
                 # cash_flow = sorted_portfolio_history[i+1]['total_deposited'] - sorted_portfolio_history[i]['total_deposited']
                 # return_for_period = (end_value - inital_value + cash_flow) / (inital_value + cash_flow)
                 # HP.append(1 + return_for_period)
-            twr_return_percentage = (numpy.prod(HP) - 1) * 100
+            twr_return_percentage = (numpy.prod(sub_period_returns) - 1) * 100
             if annualised:
                 pass
         return twr_return_percentage
