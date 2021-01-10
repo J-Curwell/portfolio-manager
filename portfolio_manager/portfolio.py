@@ -45,13 +45,15 @@ class InvestmentPortfolio:
         ----------
         deposit_amount : Union[int, float]
             The amount of money being deposited into the portfolio.
+        portfolio_value_before_deposit : Union[int, float]
+            The total value of the portfolio before making the deposit.
         date : datetime
             When the deposit was made. Defaults to now.
         """
         # Update the total amount deposited and the current portfolio value
         self.total_deposited += deposit_amount
 
-        if portfolio_value_before_deposit == None:
+        if portfolio_value_before_deposit is None:
             portfolio_value_before_deposit = self.current_portfolio_value
         self.current_portfolio_value = portfolio_value_before_deposit
         self.current_portfolio_value += deposit_amount 
@@ -71,13 +73,15 @@ class InvestmentPortfolio:
         ----------
         withdrawal_amount : Union[int, float]
             The amount of money being withdrawn from the portfolio.
+        portfolio_value_before_withdrawal : Union[int, float]
+            The total value of the portfolio before making the withdrawal.
         date : datetime
             When the withdrawal was made. Defaults to now.
         """
         # Update the total amount deposited and the current portfolio value
         self.total_deposited -= withdrawal_amount
 
-        if portfolio_value_before_withdrawal == None:
+        if portfolio_value_before_withdrawal is None:
             portfolio_value_before_withdrawal = self.current_portfolio_value
         self.current_portfolio_value = portfolio_value_before_withdrawal
         self.current_portfolio_value -= withdrawal_amount

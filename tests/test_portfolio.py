@@ -21,7 +21,7 @@ class InvestmentPortfolioTests(unittest.TestCase):
     def test_deposit(self):
         # Deposit £22.50 using a specified datetime
         past = datetime(2021, 1, 1)
-        self.test_portfolio.deposit(22.5, past)
+        self.test_portfolio.deposit(22.5, date=past)
         self.assertEqual(22.5, self.test_portfolio.total_deposited)
         self.assertEqual(22.5, self.test_portfolio.current_portfolio_value)
 
@@ -29,7 +29,7 @@ class InvestmentPortfolioTests(unittest.TestCase):
         # patch the value of the default datetime, which is datetime.now()
         with mock.patch('portfolio_manager.portfolio.datetime') as mock_datetime:
             mock_datetime.now.return_value = datetime(2021, 2, 1)
-            self.test_portfolio.deposit(27.5, 25)
+            self.test_portfolio.deposit(27.5, portfolio_value_before_deposit=25)
         self.assertEqual(50, self.test_portfolio.total_deposited)
         self.assertEqual(52.5, self.test_portfolio.current_portfolio_value)
 
