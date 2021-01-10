@@ -1,8 +1,6 @@
 import unittest
 from datetime import datetime
-from unittest import mock
-import sys
-sys.path.append("..")
+
 from portfolio_manager.portfolio import InvestmentPortfolio
 from portfolio_manager.return_calculators import TimeWeightedReturnCalculator
 
@@ -55,7 +53,7 @@ class ReturnCalculatorsTests(unittest.TestCase):
         actual_output = twr_calculator.calculate_return(self.test_portfolio,
                                                         annualised=False)
         expected_output = 18.99
-        self.assertAlmostEqual(actual_output, expected_output)
+        self.assertEqual(actual_output, expected_output)
 
 
 if __name__ == '__main__':
