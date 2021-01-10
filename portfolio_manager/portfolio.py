@@ -36,6 +36,7 @@ class InvestmentPortfolio:
 
     def deposit(self,
                 deposit_amount: Union[int, float],
+                portfolio_value_before_deposit: Union[int, float] = None,
                 date: datetime = None):
         """
         Deposit funds into the portfolio.
@@ -44,19 +45,25 @@ class InvestmentPortfolio:
         ----------
         deposit_amount : Union[int, float]
             The amount of money being deposited into the portfolio.
+        portfolio_value_before_deposit : Union[int, float]
+            The total value of the portfolio before making the deposit.
         date : datetime
             When the deposit was made. Defaults to now.
         """
-        # Update the total amount deposited and the current portfolio value
+        # Update the portfolio value from before the deposit, if this value is provided
+        if portfolio_value_before_deposit:
+            self.update_portfolio_value(portfolio_value_before_deposit, date)
+
+        # Update the total amount deposited and current portfolio value
         self.total_deposited += deposit_amount
         self.current_portfolio_value += deposit_amount
-        date = date or datetime.now()
 
         # Update portfolio_history
         self._update_portfolio_history(date, 'deposit')
 
     def withdraw(self,
                  withdrawal_amount: Union[int, float],
+                 portfolio_value_before_withdrawal: Union[int, float] = None,
                  date: datetime = None):
         """
         Deposit additional funds into the portfolio.
@@ -65,13 +72,18 @@ class InvestmentPortfolio:
         ----------
         withdrawal_amount : Union[int, float]
             The amount of money being withdrawn from the portfolio.
+        portfolio_value_before_withdrawal : Union[int, float]
+            The total value of the portfolio before making the withdrawal.
         date : datetime
             When the withdrawal was made. Defaults to now.
         """
+        # Update the portfolio value from before the deposit, if this value is provided
+        if portfolio_value_before_withdrawal:
+            self.update_portfolio_value(portfolio_value_before_withdrawal, date)
+
         # Update the total amount deposited and the current portfolio value
         self.total_deposited -= withdrawal_amount
         self.current_portfolio_value -= withdrawal_amount
-        date = date or datetime.now()
 
         # Update portfolio_history
         self._update_portfolio_history(date, 'withdrawal')
@@ -90,7 +102,6 @@ class InvestmentPortfolio:
         """
         # Update the current total value of the assets in the portfolio
         self.current_portfolio_value = current_portfolio_value
-        date = date or datetime.now()
 
         # Update portfolio_history
         self._update_portfolio_history(date, 'update_portfolio_value')
@@ -106,6 +117,9 @@ class InvestmentPortfolio:
         transaction_type : str
             The type of transaction that was made before taking the portfolio snapshot.
         """
+        # The default transaction date is now
+        date = date or datetime.now()
+
         # Update portfolio_history
         new_entry = {
             'date': date,
@@ -113,7 +127,12 @@ class InvestmentPortfolio:
             'current_portfolio_value': self.current_portfolio_value,
             'transaction_type': transaction_type
         }
-        self.portfolio_history.append(new_entry)
+        portfolio_history = self.portfolio_history
+        portfolio_history.append(new_entry)
+
+        # Ensure the portfolio history is stored in order of ascending transaction date
+        sorted_portfolio_history = sorted(portfolio_history, key=lambda x: x['date'])
+        self.portfolio_history = sorted_portfolio_history
 
     def save_portfolio(self, directory: str = None):
         """
