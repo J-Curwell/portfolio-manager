@@ -36,6 +36,7 @@ class InvestmentPortfolio:
 
     def deposit(self,
                 deposit_amount: Union[int, float],
+                portfolio_value_before_deposit: Union[int, float] = None,
                 date: datetime = None):
         """
         Deposit funds into the portfolio.
@@ -49,7 +50,11 @@ class InvestmentPortfolio:
         """
         # Update the total amount deposited and the current portfolio value
         self.total_deposited += deposit_amount
-        self.current_portfolio_value += deposit_amount
+
+        if portfolio_value_before_deposit == None:
+            portfolio_value_before_deposit = self.current_portfolio_value
+        self.current_portfolio_value = portfolio_value_before_deposit
+        self.current_portfolio_value += deposit_amount 
         date = date or datetime.now()
 
         # Update portfolio_history
@@ -57,6 +62,7 @@ class InvestmentPortfolio:
 
     def withdraw(self,
                  withdrawal_amount: Union[int, float],
+                 portfolio_value_before_withdrawal: Union[int, float] = None,
                  date: datetime = None):
         """
         Deposit additional funds into the portfolio.
@@ -70,6 +76,10 @@ class InvestmentPortfolio:
         """
         # Update the total amount deposited and the current portfolio value
         self.total_deposited -= withdrawal_amount
+
+        if portfolio_value_before_withdrawal == None:
+            portfolio_value_before_withdrawal = self.current_portfolio_value
+        self.current_portfolio_value = portfolio_value_before_withdrawal
         self.current_portfolio_value -= withdrawal_amount
         date = date or datetime.now()
 
