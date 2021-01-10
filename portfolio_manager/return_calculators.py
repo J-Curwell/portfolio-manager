@@ -1,7 +1,7 @@
 import abc
 from typing import Any, Union
-
 from portfolio_manager.portfolio import InvestmentPortfolio
+import numpy
 
 
 class ReturnCalculator(abc.ABC):
@@ -9,6 +9,7 @@ class ReturnCalculator(abc.ABC):
     def calculate_return(self, portfolio: InvestmentPortfolio,
                          annualised: bool) -> Any:
         pass
+
 
     @staticmethod
     def calculate_annualised_return(total_return_percentage: Union[int, float],
@@ -44,4 +45,18 @@ class TimeWeightedReturnCalculator(ReturnCalculator):
     """ To complete """
     def calculate_return(self, portfolio: InvestmentPortfolio,
                          annualised: bool = True) -> Any:
-        pass
+        HP = []
+        # sort df by date column
+        if len(portfolio.portfolio_history) <= 1:
+            twr_return_percentage=0
+        else:
+            for i in range(len(portfolio.portfolio_history) - 1):
+                inital_value = portfolio.portfolio_history[i]['current_portfolio_value']
+                end_value = portfolio.portfolio_history[i+1]['current_portfolio_value']
+                cash_flow = portfolio.portfolio_history[i+1]['total_deposited'] - portfolio.portfolio_history[i]['total_deposited']
+                return_for_period = (end_value - inital_value + cash_flow) / (inital_value + cash_flow)
+                HP.append(1 + return_for_period)
+            twr_return_percentage = (numpy.prod(HP) - 1) * 100
+            if annualised:
+                pass
+        return twr_return_percentage

@@ -1,7 +1,9 @@
 import unittest
 from datetime import datetime
 from unittest import mock
-
+import sys
+sys.path.append("..")
+import os 
 from portfolio_manager.portfolio import InvestmentPortfolio
 
 
