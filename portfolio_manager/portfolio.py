@@ -34,6 +34,9 @@ class InvestmentPortfolio:
         self.current_portfolio_value = current_portfolio_value or 0
         self.portfolio_history = portfolio_history or []
 
+        # Used internally for catching back-dating errors
+        self.latest_transaction_date = None
+
     def deposit(self,
                 deposit_amount: Union[int, float],
                 portfolio_value_before_deposit: Union[int, float] = None,
@@ -50,6 +53,9 @@ class InvestmentPortfolio:
         date : datetime
             When the deposit was made. Defaults to now.
         """
+        if date:
+            self._backdate_error_check(date)
+
         # Update the portfolio value from before the deposit, if this value is provided
         if portfolio_value_before_deposit:
             self.update_portfolio_value(portfolio_value_before_deposit, date)
@@ -77,9 +83,17 @@ class InvestmentPortfolio:
         date : datetime
             When the withdrawal was made. Defaults to now.
         """
+        if date:
+            self._backdate_error_check(date)
+
         # Update the portfolio value from before the deposit, if this value is provided
         if portfolio_value_before_withdrawal:
             self.update_portfolio_value(portfolio_value_before_withdrawal, date)
+
+        # If trying to withdraw more than the portfolio value, raise an error
+        if withdrawal_amount > self.current_portfolio_value:
+            raise ValueError(f'Cannot withdraw {withdrawal_amount} as this is more than '
+                             f'the portfolio value: {self.current_portfolio_value}')
 
         # Update the total amount deposited and the current portfolio value
         self.total_deposited -= withdrawal_amount
@@ -100,6 +114,9 @@ class InvestmentPortfolio:
         date : datetime
             When this valuation was calculated. Defaults to now.
         """
+        if date:
+            self._backdate_error_check(date)
+
         # Update the current total value of the assets in the portfolio
         self.current_portfolio_value = current_portfolio_value
 
@@ -133,6 +150,15 @@ class InvestmentPortfolio:
         # Ensure the portfolio history is stored in order of ascending transaction date
         sorted_portfolio_history = sorted(portfolio_history, key=lambda x: x['date'])
         self.portfolio_history = sorted_portfolio_history
+        self.latest_transaction_date = self.portfolio_history[-1]['date']
+
+    def _backdate_error_check(self, date):
+        """ Ensure that the transaction being made isn't being incorrectly back-dated """
+        if self.latest_transaction_date is not None:
+            if date < self.latest_transaction_date:
+                raise ValueError(
+                    f'Back-dating error. Attempted transaction: {date}. Latest portfolio '
+                    f'transaction: {self.latest_transaction_date}.')
 
     def get_portfolio_age(self, unit: str = None) -> Union[int, float]:
         """

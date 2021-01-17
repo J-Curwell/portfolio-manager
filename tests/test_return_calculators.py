@@ -8,7 +8,7 @@ from portfolio_manager.return_calculators import TimeWeightedReturnCalculator
 class ReturnCalculatorsTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_portfolio = InvestmentPortfolio(name="test_portfolio")
-    
+
     def test_time_weighted_return(self):
         test_data = [
             {
