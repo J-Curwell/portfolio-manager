@@ -161,37 +161,6 @@ class InvestmentPortfolio:
                     f'Back-dating error. Attempted transaction: {date}. Latest portfolio'
                     f' transaction: {self.latest_transaction_date}.')
 
-    def get_portfolio_age(self, unit: str = None) -> Union[int, float]:
-        """
-        Calculate the 'age' of the portfolio. This is the difference in time between the
-        first transaction in the portfolio and the most recent one.
-
-        Parameters
-        ----------
-        unit : str
-            The desired unit of time for portfolio age to be calculated in. Defaults to
-            years but can also be 'months' or 'days'.
-
-        Returns
-        -------
-        Union[int, float]: The age of the portfolio measure in the specified unit of
-            time, or years by default.
-        """
-        # Here we make use of the fact that the transactions within portfolio history
-        # are ordered by ascending date
-        start = self.portfolio_history[0]['date']
-        end = self.portfolio_history[-1]['date']
-        delta = end - start
-
-        if unit == 'days':
-            return delta.days
-
-        if unit == 'months':
-            return delta.days / 12
-
-        # By default, return the portfolio age in years
-        return delta.days / 365
-
     def save_portfolio(self, directory: str = None):
         """
         Save the state of the current portfolio. The portfolio object is pickled and

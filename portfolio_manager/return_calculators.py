@@ -13,28 +13,84 @@ class ReturnCalculator(abc.ABC):
                          annualised: bool) -> Any:
         pass
 
-    @staticmethod
-    def calculate_annualised_return(portfolio: InvestmentPortfolio,
+    def calculate_annualised_return(self, portfolio: InvestmentPortfolio,
                                     total_return_percentage: Union[int, float]):
-        """ To complete """
-        portfolio_age = portfolio.get_portfolio_age()
+        """
+        Given the overall return percentage of a portfolio, calculate the annualised
+        return percentage.
+        """
+        portfolio_age = self.get_portfolio_age(portfolio)
         annualised_return = (1 + total_return_percentage / 100) ** (1 / portfolio_age)
         annualised_return_percentage = (annualised_return - 1) * 100
         return annualised_return_percentage
 
+    @staticmethod
+    def get_portfolio_age(portfolio: InvestmentPortfolio,
+                          unit: str = None) -> Union[int, float]:
+        """
+        Calculate the 'age' of a portfolio. This is the difference in time between the
+        first transaction in the portfolio and the most recent one.
 
-class StandardReturnCalculator(ReturnCalculator):
+        Parameters
+        ----------
+        portfolio : InvestmentPortfolio
+            The portfolio we are calculating the age of.
+        unit : str
+            The desired unit of time for portfolio age to be calculated in. Defaults to
+            years but can also be 'months' or 'days'.
+
+        Returns
+        -------
+        Union[int, float]: The age of the portfolio measure in the specified unit of
+            time, or years by default.
+        """
+        # Here we make use of the fact that the transactions within portfolio history
+        # are ordered by ascending date
+        start = portfolio.portfolio_history[0]['date']
+        end = portfolio.portfolio_history[-1]['date']
+        delta = end - start
+
+        if unit == 'days':
+            return delta.days
+
+        if unit == 'months':
+            return delta.days / 12
+
+        # By default, return the portfolio age in years
+        return delta.days / 365
+
+
+class SimpleReturnCalculator(ReturnCalculator):
     """
-    Calculate the percentage return of the portfolio using the following formula:
+    Calculate the simple percentage return of a portfolio using the following formula:
 
     ((current portfolio value - total amount deposited) / total amount deposited) * 100
 
-    ...
-
+    Note: If, due to a combination of deposits and withdrawals, the total amount
+    deposited in the portfolio is <= 0 then this value will be meaningless. In this case,
+    a TimeWeightedReturnCalculator is a better choice.
     """
     def calculate_return(self, portfolio: InvestmentPortfolio,
                          annualised: bool = True) -> Any:
-        """ To complete """
+        """
+        Calculate the simple rate of return of the portfolio.
+
+        Parameters
+        ----------
+        portfolio : InvestmentPortfolio
+            The portfolio we are calculating the simple return for.
+        annualised : bool
+            If True, calculate the annualised return.
+
+        Returns
+        -------
+        Any : The simple rate of return of the portfolio, as a percentage.
+            e.g. 18 represents 18%.
+        """
+        # If there isn't enough data in the portfolio, raise an error
+        if len(portfolio.portfolio_history) <= 1:
+            raise ValueError('Not enough portfolio data to calculate a return.')
+
         return_amount = portfolio.current_portfolio_value - portfolio.total_deposited
         return_percentage = (return_amount / portfolio.total_deposited) * 100
 
@@ -46,12 +102,31 @@ class StandardReturnCalculator(ReturnCalculator):
 
 
 class TimeWeightedReturnCalculator(ReturnCalculator):
-    """ To complete """
+    """
+    Calculate the time-weighted rate of return of a portfolio. This metric is useful for
+    measuring the performance of a portfolio where many deposits/withdrawals have been
+    paid over time. See for more information
+    """
     def calculate_return(self, portfolio: InvestmentPortfolio,
                          annualised: bool = True) -> Any:
-        # If there isn't enough data in the portfolio, return 0
+        """
+        Calculate the time-weighted rate of return of the portfolio.
+
+        Parameters
+        ----------
+        portfolio : InvestmentPortfolio
+            The portfolio we are calculating the time-weighted return for.
+        annualised : bool
+            If True, calculate the annualised return.
+
+        Returns
+        -------
+        Any : The time-weighted rate of return of the portfolio, as a percentage.
+            e.g. 18 represents 18%.
+        """
+        # If there isn't enough data in the portfolio, raise an error
         if len(portfolio.portfolio_history) <= 1:
-            return 0
+            raise ValueError('Not enough portfolio data to calculate a return.')
 
         # Otherwise, calculate the time-weighted return
         sub_period_returns = []
