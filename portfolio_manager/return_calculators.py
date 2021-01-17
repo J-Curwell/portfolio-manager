@@ -94,6 +94,10 @@ class SimpleReturnCalculator(ReturnCalculator):
         if len(portfolio.portfolio_history) <= 1:
             raise ValueError('Not enough portfolio data to calculate a return.')
 
+        # If the sum of all deposits and withdrawals is negative or zero, raise an error
+        if portfolio.total_deposited <= 0:
+            raise ValueError('Total deposited is negative or zero.')
+
         return_amount = portfolio.current_portfolio_value - portfolio.total_deposited
         return_percentage = (return_amount / portfolio.total_deposited) * 100
 
@@ -101,7 +105,7 @@ class SimpleReturnCalculator(ReturnCalculator):
             return_percentage = self.calculate_annualised_return(portfolio,
                                                                  return_percentage)
 
-        return return_percentage
+        return round(return_percentage, 2)
 
 
 class TimeWeightedReturnCalculator(ReturnCalculator):
