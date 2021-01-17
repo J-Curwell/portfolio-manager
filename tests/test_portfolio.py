@@ -150,6 +150,26 @@ class InvestmentPortfolioTests(unittest.TestCase):
         self.assertListEqual(expected_transaction_history,
                              self.test_portfolio.portfolio_history)
 
+    def test_backdate_error_check(self):
+        # Test that an empty portfolio doesn't raise an error
+        actual = self.test_portfolio._backdate_error_check(datetime(2020, 1, 1))
+        self.assertIsNone(actual)
+
+        # Test that a transaction on the same day doesn't raise an error
+        self.test_portfolio.latest_transaction_date = datetime(2020, 1, 1)
+        actual = self.test_portfolio._backdate_error_check(datetime(2020, 1, 1))
+        self.assertIsNone(actual)
+
+        # Test that a transaction in the future doesn't raise an error
+        self.test_portfolio.latest_transaction_date = datetime(2020, 1, 1)
+        actual = self.test_portfolio._backdate_error_check(datetime(2020, 1, 2))
+        self.assertIsNone(actual)
+
+        # Test that a transaction in the past raises an error
+        self.test_portfolio.latest_transaction_date = datetime(2020, 1, 2)
+        with self.assertRaises(ValueError):
+            self.test_portfolio._backdate_error_check(datetime(2020, 1, 1))
+
 
 if __name__ == "__main__":
     unittest.main()
