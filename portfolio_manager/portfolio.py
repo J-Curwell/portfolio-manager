@@ -34,8 +34,12 @@ class InvestmentPortfolio:
         self.current_portfolio_value = current_portfolio_value or 0
         self.portfolio_history = portfolio_history or []
 
+        # Used internally for catching back-dating errors
+        self.latest_transaction_date = None
+
     def deposit(self,
                 deposit_amount: Union[int, float],
+                portfolio_value_before_deposit: Union[int, float] = None,
                 date: datetime = None):
         """
         Deposit funds into the portfolio.
@@ -44,19 +48,28 @@ class InvestmentPortfolio:
         ----------
         deposit_amount : Union[int, float]
             The amount of money being deposited into the portfolio.
+        portfolio_value_before_deposit : Union[int, float]
+            The total value of the portfolio before making the deposit.
         date : datetime
             When the deposit was made. Defaults to now.
         """
-        # Update the total amount deposited and the current portfolio value
+        date = date or datetime.now()
+        self._backdate_error_check(date)
+
+        # Update the portfolio value from before the deposit, if this value is provided
+        if portfolio_value_before_deposit:
+            self.update_portfolio_value(portfolio_value_before_deposit, date)
+
+        # Update the total amount deposited and current portfolio value
         self.total_deposited += deposit_amount
         self.current_portfolio_value += deposit_amount
-        date = date or datetime.now()
 
         # Update portfolio_history
         self._update_portfolio_history(date, 'deposit')
 
     def withdraw(self,
                  withdrawal_amount: Union[int, float],
+                 portfolio_value_before_withdrawal: Union[int, float] = None,
                  date: datetime = None):
         """
         Deposit additional funds into the portfolio.
@@ -65,13 +78,26 @@ class InvestmentPortfolio:
         ----------
         withdrawal_amount : Union[int, float]
             The amount of money being withdrawn from the portfolio.
+        portfolio_value_before_withdrawal : Union[int, float]
+            The total value of the portfolio before making the withdrawal.
         date : datetime
             When the withdrawal was made. Defaults to now.
         """
+        date = date or datetime.now()
+        self._backdate_error_check(date)
+
+        # Update the portfolio value from before the deposit, if this value is provided
+        if portfolio_value_before_withdrawal:
+            self.update_portfolio_value(portfolio_value_before_withdrawal, date)
+
+        # If trying to withdraw more than the portfolio value, raise an error
+        if withdrawal_amount > self.current_portfolio_value:
+            raise ValueError(f'Cannot withdraw {withdrawal_amount} as this is more than '
+                             f'the portfolio value: {self.current_portfolio_value}')
+
         # Update the total amount deposited and the current portfolio value
         self.total_deposited -= withdrawal_amount
         self.current_portfolio_value -= withdrawal_amount
-        date = date or datetime.now()
 
         # Update portfolio_history
         self._update_portfolio_history(date, 'withdrawal')
@@ -88,9 +114,15 @@ class InvestmentPortfolio:
         date : datetime
             When this valuation was calculated. Defaults to now.
         """
+        if len(self.portfolio_history) == 0:
+            raise ValueError("First portfolio transaction can't be a value update; make "
+                             "a deposit first!")
+
+        date = date or datetime.now()
+        self._backdate_error_check(date)
+
         # Update the current total value of the assets in the portfolio
         self.current_portfolio_value = current_portfolio_value
-        date = date or datetime.now()
 
         # Update portfolio_history
         self._update_portfolio_history(date, 'update_portfolio_value')
@@ -113,14 +145,32 @@ class InvestmentPortfolio:
             'current_portfolio_value': self.current_portfolio_value,
             'transaction_type': transaction_type
         }
-        self.portfolio_history.append(new_entry)
+        portfolio_history = self.portfolio_history
+        portfolio_history.append(new_entry)
+
+        # Ensure the portfolio history is stored in order of ascending transaction date
+        sorted_portfolio_history = sorted(portfolio_history, key=lambda x: x['date'])
+        self.portfolio_history = sorted_portfolio_history
+        self.latest_transaction_date = self.portfolio_history[-1]['date']
+
+    def _backdate_error_check(self, date):
+        """ Ensure that the transaction being made isn't being incorrectly back-dated """
+        if self.latest_transaction_date is not None:
+            if date < self.latest_transaction_date:
+                raise ValueError(
+                    f'Back-dating error. Attempted transaction: {date}. Latest portfolio'
+                    f' transaction: {self.latest_transaction_date}.')
 
     def save_portfolio(self, directory: str = None):
         """
-        Save the state of a portfolio
+        Save the state of the current portfolio. The portfolio object is pickled and
+        saved within the specified directory under the name '{self.name}.pkl'.
 
-        ...
-
+        Parameters
+        ----------
+        directory : str
+            The directory that the pickled object should be saved in. Defaults to the
+            current working directory.
         """
         path = f'{directory}/{self.name}.pkl' if directory else f'{self.name}.pkl'
 
@@ -128,10 +178,31 @@ class InvestmentPortfolio:
         with open(path, 'wb') as handle:
             pickle.dump(self, handle, pickle.HIGHEST_PROTOCOL)
 
-    @staticmethod
-    def load_portfolio(path: str = None):
-        """ To complete """
-        # Load the portfolio
-        with open(path, 'rb') as handle:
-            portfolio = pickle.load(handle)
-        return portfolio
+
+def load_portfolio(name: str, directory: str = None) -> InvestmentPortfolio:
+    """
+    Load a previously pickled and saved portfolio from the specified path.
+
+    Parameters
+    ----------
+    name : str
+        The name of the portfolio being loaded. i.e. the 'name' attribute of the saved
+        portfolio object.
+    directory : str
+        The directory containing the saved portfolio. By default, look in the current
+        working directory.
+
+    Returns
+    -------
+    InvestmentPortfolio : The instantiated portfolio object.
+    """
+    # Add the .pkl file extension if it isn't already there
+    if '.' not in name:
+        name += '.pkl'
+
+    # Load and return the portfolio
+    path = f'{directory}/{name}' if directory else name
+    with open(path, 'rb') as handle:
+        portfolio = pickle.load(handle)
+
+    return portfolio
