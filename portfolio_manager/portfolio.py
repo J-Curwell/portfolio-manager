@@ -53,8 +53,8 @@ class InvestmentPortfolio:
         date : datetime
             When the deposit was made. Defaults to now.
         """
-        if date:
-            self._backdate_error_check(date)
+        date = date or datetime.now()
+        self._backdate_error_check(date)
 
         # Update the portfolio value from before the deposit, if this value is provided
         if portfolio_value_before_deposit:
@@ -83,8 +83,8 @@ class InvestmentPortfolio:
         date : datetime
             When the withdrawal was made. Defaults to now.
         """
-        if date:
-            self._backdate_error_check(date)
+        date = date or datetime.now()
+        self._backdate_error_check(date)
 
         # Update the portfolio value from before the deposit, if this value is provided
         if portfolio_value_before_withdrawal:
@@ -114,8 +114,12 @@ class InvestmentPortfolio:
         date : datetime
             When this valuation was calculated. Defaults to now.
         """
-        if date:
-            self._backdate_error_check(date)
+        if len(self.portfolio_history) == 0:
+            raise ValueError("First portfolio transaction can't be a value update; make "
+                             "a deposit first!")
+
+        date = date or datetime.now()
+        self._backdate_error_check(date)
 
         # Update the current total value of the assets in the portfolio
         self.current_portfolio_value = current_portfolio_value
@@ -134,9 +138,6 @@ class InvestmentPortfolio:
         transaction_type : str
             The type of transaction that was made before taking the portfolio snapshot.
         """
-        # The default transaction date is now
-        date = date or datetime.now()
-
         # Update portfolio_history
         new_entry = {
             'date': date,
@@ -157,8 +158,8 @@ class InvestmentPortfolio:
         if self.latest_transaction_date is not None:
             if date < self.latest_transaction_date:
                 raise ValueError(
-                    f'Back-dating error. Attempted transaction: {date}. Latest portfolio '
-                    f'transaction: {self.latest_transaction_date}.')
+                    f'Back-dating error. Attempted transaction: {date}. Latest portfolio'
+                    f' transaction: {self.latest_transaction_date}.')
 
     def get_portfolio_age(self, unit: str = None) -> Union[int, float]:
         """
@@ -186,10 +187,10 @@ class InvestmentPortfolio:
             return delta.days
 
         if unit == 'months':
-            return delta.days/12
+            return delta.days / 12
 
         # By default, return the portfolio age in years
-        return delta.days/365
+        return delta.days / 365
 
     def save_portfolio(self, directory: str = None):
         """

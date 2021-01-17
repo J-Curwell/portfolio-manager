@@ -36,7 +36,7 @@ class StandardReturnCalculator(ReturnCalculator):
                          annualised: bool = True) -> Any:
         """ To complete """
         return_amount = portfolio.current_portfolio_value - portfolio.total_deposited
-        return_percentage = (return_amount/portfolio.total_deposited) * 100
+        return_percentage = (return_amount / portfolio.total_deposited) * 100
 
         if annualised:
             return_percentage = self.calculate_annualised_return(portfolio,
@@ -55,13 +55,13 @@ class TimeWeightedReturnCalculator(ReturnCalculator):
 
         # Otherwise, calculate the time-weighted return
         sub_period_returns = []
-        portfolio_data = pd.DataFrame(portfolio.portfolio_history)
+        df = pd.DataFrame(portfolio.portfolio_history)
 
         # Group the data into sub-periods. Identify these sub-periods by finding groups
         # of consecutive transactions with the same 'total_deposited' values
-        is_new_period_ser = pd.Series((portfolio_data['total_deposited'].shift() !=
-                                       portfolio_data['total_deposited']))
-        grouped_periods = portfolio_data.groupby(is_new_period_ser.cumsum())
+        is_new_period_ser = pd.Series(
+            df['total_deposited'].shift() != df['total_deposited'])
+        grouped_periods = df.groupby(is_new_period_ser.cumsum())
 
         # Loop through each sub-period to calculate the returns for that period
         for _, data in grouped_periods:
