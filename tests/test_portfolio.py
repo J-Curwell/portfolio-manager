@@ -33,8 +33,7 @@ class InvestmentPortfolioTests(unittest.TestCase):
         self.assertEqual(52.5, self.test_portfolio.current_portfolio_value)
 
         # Check the two deposits and one value update were successfully recorded
-        expected_transaction_history = [
-                {'date': past,
+        expected_transaction_history = [{'date': past,
                                          'total_deposited': 22.5,
                                          'current_portfolio_value': 22.5,
                                          'transaction_type': 'deposit'},
