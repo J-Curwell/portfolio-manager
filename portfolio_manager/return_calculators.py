@@ -22,7 +22,7 @@ class ReturnCalculator(abc.ABC):
         portfolio_age = self.get_portfolio_age(portfolio)
         annualised_return = (1 + total_return_percentage / 100) ** (1 / portfolio_age)
         annualised_return_percentage = (annualised_return - 1) * 100
-        return annualised_return_percentage
+        return round(annualised_return_percentage, 2)
 
     @staticmethod
     def get_portfolio_age(portfolio: InvestmentPortfolio,
@@ -51,13 +51,16 @@ class ReturnCalculator(abc.ABC):
         delta = end - start
 
         if unit == 'days':
-            return delta.days
+            # Round to the nearest integer
+            return round(delta.days, 0)
 
         if unit == 'months':
-            return delta.days / 12
+            # Round to the nearest integer
+            return round((delta.days / 365) * 12, 0)
 
-        # By default, return the portfolio age in years
-        return delta.days / 365
+        # By default, return the portfolio age in years, rounded to the nearest 2 d.p's
+        if unit == 'years' or unit is None:
+            return round(delta.days / 365, 2)
 
 
 class SimpleReturnCalculator(ReturnCalculator):
