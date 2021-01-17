@@ -134,12 +134,47 @@ class InvestmentPortfolio:
         sorted_portfolio_history = sorted(portfolio_history, key=lambda x: x['date'])
         self.portfolio_history = sorted_portfolio_history
 
+    def get_portfolio_age(self, unit: str = None) -> Union[int, float]:
+        """
+        Calculate the 'age' of the portfolio. This is the difference in time between the
+        first transaction in the portfolio and the most recent one.
+
+        Parameters
+        ----------
+        unit : str
+            The desired unit of time for portfolio age to be calculated in. Defaults to
+            years but can also be 'months' or 'days'.
+
+        Returns
+        -------
+        Union[int, float]: The age of the portfolio measure in the specified unit of
+            time, or years by default.
+        """
+        # Here we make use of the fact that the transactions within portfolio history
+        # are ordered by ascending date
+        start = self.portfolio_history[0]['date']
+        end = self.portfolio_history[-1]['date']
+        delta = end - start
+
+        if unit == 'days':
+            return delta.days
+
+        if unit == 'months':
+            return delta.days/12
+
+        # By default, return the portfolio age in years
+        return delta.days/365
+
     def save_portfolio(self, directory: str = None):
         """
-        Save the state of a portfolio
+        Save the state of the current portfolio. The portfolio object is pickled and
+        saved within the specified directory under the name '{self.name}.pkl'.
 
-        ...
-
+        Parameters
+        ----------
+        directory : str
+            The directory that the pickled object should be saved in. Defaults to the
+            current working directory.
         """
         path = f'{directory}/{self.name}.pkl' if directory else f'{self.name}.pkl'
 
@@ -147,10 +182,31 @@ class InvestmentPortfolio:
         with open(path, 'wb') as handle:
             pickle.dump(self, handle, pickle.HIGHEST_PROTOCOL)
 
-    @staticmethod
-    def load_portfolio(path: str = None):
-        """ To complete """
-        # Load the portfolio
-        with open(path, 'rb') as handle:
-            portfolio = pickle.load(handle)
-        return portfolio
+
+def load_portfolio(name: str, directory: str = None) -> InvestmentPortfolio:
+    """
+    Load a previously pickled and saved portfolio from the specified path.
+
+    Parameters
+    ----------
+    name : str
+        The name of the portfolio being loaded. i.e. the 'name' attribute of the saved
+        portfolio object.
+    directory : str
+        The directory containing the saved portfolio. By default, look in the current
+        working directory.
+
+    Returns
+    -------
+    InvestmentPortfolio : The instantiated portfolio object.
+    """
+    # Add the .pkl file extension if it isn't already there
+    if '.' not in name:
+        name += '.pkl'
+
+    # Load and return the portfolio
+    path = f'{directory}/{name}' if directory else name
+    with open(path, 'rb') as handle:
+        portfolio = pickle.load(handle)
+
+    return portfolio
