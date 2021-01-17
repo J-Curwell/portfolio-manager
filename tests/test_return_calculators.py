@@ -48,12 +48,8 @@ class ReturnCalculatorsTests(unittest.TestCase):
             }
         ]
         self.test_portfolio.portfolio_history = test_data
-        actual_years = ReturnCalculator.get_portfolio_age(self.test_portfolio)
-        self.assertEqual(0.5, actual_years)
-        actual_months = ReturnCalculator.get_portfolio_age(self.test_portfolio, 'months')
-        self.assertEqual(6, actual_months)
-        actual_days = ReturnCalculator.get_portfolio_age(self.test_portfolio, 'days')
-        self.assertEqual(184, actual_days)
+        actual = ReturnCalculator.get_portfolio_age(self.test_portfolio)
+        self.assertEqual(0.5, actual)
 
     def test_get_portfolio_age_medium(self):
         # Test a portfolio of age 1 year
@@ -69,12 +65,8 @@ class ReturnCalculatorsTests(unittest.TestCase):
             }
         ]
         self.test_portfolio.portfolio_history = test_data
-        actual_years = ReturnCalculator.get_portfolio_age(self.test_portfolio, 'years')
-        self.assertEqual(1, actual_years)
-        actual_months = ReturnCalculator.get_portfolio_age(self.test_portfolio, 'months')
-        self.assertEqual(12, actual_months)
-        actual_days = ReturnCalculator.get_portfolio_age(self.test_portfolio, 'days')
-        self.assertEqual(365, actual_days)
+        actual = ReturnCalculator.get_portfolio_age(self.test_portfolio)
+        self.assertEqual(1, actual)
 
     def test_get_portfolio_age_longer(self):
         # Test a portfolio of age > 1 year
@@ -93,12 +85,8 @@ class ReturnCalculatorsTests(unittest.TestCase):
             }
         ]
         self.test_portfolio.portfolio_history = test_data
-        actual_years = ReturnCalculator.get_portfolio_age(self.test_portfolio)
-        self.assertEqual(2.17, actual_years)
-        actual_months = ReturnCalculator.get_portfolio_age(self.test_portfolio, 'months')
-        self.assertEqual(26, actual_months)
-        actual_days = ReturnCalculator.get_portfolio_age(self.test_portfolio, 'days')
-        self.assertEqual(792, actual_days)
+        actual = ReturnCalculator.get_portfolio_age(self.test_portfolio)
+        self.assertEqual(2.17, actual)
 
 
 class SimpleReturnCalculatorTests(unittest.TestCase):

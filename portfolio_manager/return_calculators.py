@@ -25,24 +25,19 @@ class ReturnCalculator(abc.ABC):
         return round(annualised_return_percentage, 2)
 
     @staticmethod
-    def get_portfolio_age(portfolio: InvestmentPortfolio,
-                          unit: str = None) -> Union[int, float]:
+    def get_portfolio_age(portfolio: InvestmentPortfolio) -> Union[int, float]:
         """
-        Calculate the 'age' of a portfolio. This is the difference in time between the
+        Calculate the 'age' of a portfolio. This is the number of years between the
         first transaction in the portfolio and the most recent one.
 
         Parameters
         ----------
         portfolio : InvestmentPortfolio
             The portfolio we are calculating the age of.
-        unit : str
-            The desired unit of time for portfolio age to be calculated in. Defaults to
-            years but can also be 'months' or 'days'.
 
         Returns
         -------
-        Union[int, float]: The age of the portfolio measure in the specified unit of
-            time, or years by default.
+        Union[int, float]: The age of the portfolio, measured in years.
         """
         # Here we make use of the fact that the transactions within portfolio history
         # are ordered by ascending date
@@ -50,17 +45,8 @@ class ReturnCalculator(abc.ABC):
         end = portfolio.portfolio_history[-1]['date']
         delta = end - start
 
-        if unit == 'days':
-            # Round to the nearest integer
-            return round(delta.days, 0)
-
-        if unit == 'months':
-            # Round to the nearest integer
-            return round((delta.days / 365) * 12, 0)
-
-        # By default, return the portfolio age in years, rounded to the nearest 2 d.p's
-        if unit == 'years' or unit is None:
-            return round(delta.days / 365, 2)
+        # Return the portfolio age in years, rounded to the nearest 2 d.p's
+        return round(delta.days / 365, 2)
 
 
 class SimpleReturnCalculator(ReturnCalculator):
