@@ -1,26 +1,19 @@
 # portfolio-manager
 
-Simple tool for tracking the performance of an investment portfolio.
+A simple tool for tracking and analysing the performance of an investment portfolio.
 
 ## Installation
 
-Once on PyPi info on how to install here.
+WIP: Once available on PyPI, add info on how to install here.
 
 ## Usage
 
-Upon instantiation portfolio has methods to deposit, withdraw, update portfolio value and update portfolio history. Portfolio history is ordered by datetime.
+This package provides the user with the functionality to make  deposits and withdrawals of funds into one or more investment portfolios. The overall value of the portfolios can be updated over time based on the market value of the underlying assets, and these transactions are logged and saved.
 
-Methods save portfolio and load portfolio allow for the portfolio object to be stored and loaded via pickle.
+The package also contains various methods for calculating the rate of return of the user’s portfolios. These methods include a simple percentage return calculator and a more sophisticated time-weighted return calculator.
 
-Package contains methods that allows for calculating the total return of a portfolio, the time weighted return and the annualised return of either of these method.
-
-Uses of the funcionality can be seen in the usage jupyter notebook
+Example usage of the package can be found in the Jupyter Notebooks within portfolio-manager/notebooks.
 
 ## License
 
 MIT license
-
-
-
-
-
