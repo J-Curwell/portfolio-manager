@@ -3,6 +3,8 @@ from datetime import datetime
 from unittest import mock
 
 from portfolio_manager.portfolio import InvestmentPortfolio
+from portfolio_manager.exceptions import (BackDatingError, InsufficientData,
+                                          InsufficientFunds)
 
 
 class InvestmentPortfolioTests(unittest.TestCase):
@@ -49,19 +51,19 @@ class InvestmentPortfolioTests(unittest.TestCase):
                              self.test_portfolio.portfolio_history)
 
         # Test that trying to incorrectly back-date a deposit raises an error
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BackDatingError):
             self.test_portfolio.deposit(22.5, date=past)
 
     def test_withdraw(self):
         # Test that trying to withdraw more money than is available raises an error
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InsufficientFunds):
             self.test_portfolio.withdraw(10)
 
         # Deposit some funds to avoid the above error for the remaining tests
         self.test_portfolio.deposit(50, date=datetime(2021, 1, 1))
 
         # Test that trying to incorrectly back-date a withdrawal raises an error
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BackDatingError):
             self.test_portfolio.withdraw(10, date=datetime(2020, 1, 1))
 
         # Test withdrawing 10 from a specified date
@@ -100,14 +102,14 @@ class InvestmentPortfolioTests(unittest.TestCase):
 
     def test_update_portfolio_value(self):
         # Updating the portfolio value before any deposits should cause an error
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InsufficientData):
             self.test_portfolio.update_portfolio_value(10)
 
         # Deposit some funds to avoid the above error for the remaining tests
         self.test_portfolio.deposit(50, date=datetime(2021, 1, 1))
 
         # Test that trying to incorrectly back-date a value-update raises an error
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BackDatingError):
             self.test_portfolio.update_portfolio_value(10, date=datetime(2020, 1, 1))
 
         # Test updating value to 40 from a specified date
@@ -156,8 +158,8 @@ class InvestmentPortfolioTests(unittest.TestCase):
         self.assertIsNone(actual)
 
         # Test that a transaction on the same day doesn't raise an error
-        self.test_portfolio.latest_transaction_date = datetime(2020, 1, 1)
-        actual = self.test_portfolio._backdate_error_check(datetime(2020, 1, 1))
+        self.test_portfolio.latest_transaction_date = datetime(2020, 1, 1, 12)
+        actual = self.test_portfolio._backdate_error_check(datetime(2020, 1, 1, 13))
         self.assertIsNone(actual)
 
         # Test that a transaction in the future doesn't raise an error
@@ -167,7 +169,7 @@ class InvestmentPortfolioTests(unittest.TestCase):
 
         # Test that a transaction in the past raises an error
         self.test_portfolio.latest_transaction_date = datetime(2020, 1, 2)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BackDatingError):
             self.test_portfolio._backdate_error_check(datetime(2020, 1, 1))
 
 

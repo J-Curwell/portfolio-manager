@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from numpy_financial import irr
 
+from portfolio_manager.exceptions import InsufficientData
 from portfolio_manager.portfolio import InvestmentPortfolio
 
 
@@ -79,7 +80,7 @@ class SimpleReturnCalculator(ReturnCalculator):
         """
         # If there isn't enough data in the portfolio, raise an error
         if len(portfolio.portfolio_history) <= 1:
-            raise ValueError('Not enough portfolio data to calculate a return.')
+            raise InsufficientData('Not enough portfolio data to calculate a return.')
 
         # If the sum of all deposits and withdrawals is negative or zero, raise an error
         if portfolio.total_deposited <= 0:
@@ -120,7 +121,7 @@ class TimeWeightedReturnCalculator(ReturnCalculator):
         """
         # If there isn't enough data in the portfolio, raise an error
         if len(portfolio.portfolio_history) <= 1:
-            raise ValueError('Not enough portfolio data to calculate a return.')
+            raise InsufficientData('Not enough portfolio data to calculate a return.')
 
         # Otherwise, calculate the time-weighted return
         sub_period_returns = []
