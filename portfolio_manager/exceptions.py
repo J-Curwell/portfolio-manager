@@ -4,7 +4,7 @@ class PortfolioError(Exception):
 
 
 class BackDatingError(PortfolioError):
-    """ Attempting to make transactions in the wrong order. """
+    """ Attempting to back-date a transaction too far into the past. """
     pass
 
 
