@@ -2,6 +2,9 @@ import pickle
 from datetime import datetime
 from typing import Union, List
 
+from portfolio_manager.exceptions import (InsufficientFunds, BackDatingError,
+                                          InsufficientData)
+
 
 class InvestmentPortfolio:
     def __init__(self,
@@ -92,8 +95,8 @@ class InvestmentPortfolio:
 
         # If trying to withdraw more than the portfolio value, raise an error
         if withdrawal_amount > self.current_portfolio_value:
-            raise ValueError(f'Cannot withdraw {withdrawal_amount} as this is more than '
-                             f'the portfolio value: {self.current_portfolio_value}')
+            raise InsufficientFunds(f'Cannot withdraw more than the portfolio value: '
+                                    f'{self.current_portfolio_value}')
 
         # Update the total amount deposited and the current portfolio value
         self.total_deposited -= withdrawal_amount
@@ -115,8 +118,8 @@ class InvestmentPortfolio:
             When this valuation was calculated. Defaults to now.
         """
         if len(self.portfolio_history) == 0:
-            raise ValueError("First portfolio transaction can't be a value update; make "
-                             "a deposit first!")
+            raise InsufficientData("First transaction can't be a value update; make a "
+                                   "deposit!")
 
         date = date or datetime.now()
         self._backdate_error_check(date)
@@ -156,10 +159,10 @@ class InvestmentPortfolio:
     def _backdate_error_check(self, date):
         """ Ensure that the transaction being made isn't being incorrectly back-dated """
         if self.latest_transaction_date is not None:
-            if date < self.latest_transaction_date:
-                raise ValueError(
-                    f'Back-dating error. Attempted transaction: {date}. Latest portfolio'
-                    f' transaction: {self.latest_transaction_date}.')
+            if date <= self.latest_transaction_date:
+                raise BackDatingError(
+                    f'Attempted transaction: {date}. Latest portfolio transaction: '
+                    f'{self.latest_transaction_date}.')
 
     def save_portfolio(self, directory: str = None):
         """

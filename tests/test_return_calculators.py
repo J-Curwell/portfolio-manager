@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock
 
+from portfolio_manager.exceptions import InsufficientData
 from portfolio_manager.portfolio import InvestmentPortfolio
 from portfolio_manager.return_calculators import (TimeWeightedReturnCalculator,
                                                   ReturnCalculator,
@@ -96,7 +97,7 @@ class SimpleReturnCalculatorTests(unittest.TestCase):
 
     def test_calculate_return_no_portfolio_data(self):
         # Test that one or less transaction results in an error
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InsufficientData):
             self.simple_return_calculator.calculate_return(self.test_portfolio,
                                                            annualised=False)
 
@@ -126,7 +127,7 @@ class SimpleReturnCalculatorTests(unittest.TestCase):
                 'transaction_type': 'update_portfolio_value'
             }
         ]
-        # Test that zero total deposited raises an error
+        # Test that negative total deposited raises an error
         self.test_portfolio.portfolio_history = test_data
         self.test_portfolio.total_deposited = -5
         with self.assertRaises(ValueError):
@@ -219,7 +220,7 @@ class TimeWeightedReturnCalculatorTests(unittest.TestCase):
 
     def test_calculate_return_no_data(self):
         # Test that one or less transaction results in an error
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InsufficientData):
             self.twr_calculator.calculate_return(self.test_portfolio, annualised=False)
 
     def test_calculate_return_single_period(self):
