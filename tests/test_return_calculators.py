@@ -2,11 +2,13 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock
 
+from numpy_financial import irr
 from portfolio_manager.exceptions import InsufficientData
 from portfolio_manager.portfolio import InvestmentPortfolio
 from portfolio_manager.return_calculators import (TimeWeightedReturnCalculator,
                                                   ReturnCalculator,
-                                                  SimpleReturnCalculator)
+                                                  SimpleReturnCalculator,
+                                                  MoneyWeightedReturnCalculator)
 
 
 class ReturnCalculatorsTests(unittest.TestCase):
@@ -230,13 +232,13 @@ class TimeWeightedReturnCalculatorTests(unittest.TestCase):
                 'date': datetime(2021, 1, 1),
                 'total_deposited': 100,
                 'current_portfolio_value': 100,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 2),
                 'total_deposited': 100,
                 'current_portfolio_value': 110,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             }
         ]
         self.test_portfolio.portfolio_history = test_data
@@ -252,37 +254,37 @@ class TimeWeightedReturnCalculatorTests(unittest.TestCase):
                 'date': datetime(2021, 1, 1),
                 'total_deposited': 100,
                 'current_portfolio_value': 100,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 2),
                 'total_deposited': 100,
                 'current_portfolio_value': 110,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             },
             {
                 'date': datetime(2021, 1, 3),
                 'total_deposited': 200,
                 'current_portfolio_value': 210,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 4),
                 'total_deposited': 200,
                 'current_portfolio_value': 215,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             },
             {
                 'date': datetime(2021, 1, 5),
                 'total_deposited': 250,
                 'current_portfolio_value': 265,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 6),
                 'total_deposited': 250,
                 'current_portfolio_value': 280,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             }
         ]
         self.test_portfolio.portfolio_history = test_data
@@ -298,37 +300,37 @@ class TimeWeightedReturnCalculatorTests(unittest.TestCase):
                 'date': datetime(2021, 1, 1),
                 'total_deposited': 100,
                 'current_portfolio_value': 100,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 2),
                 'total_deposited': 100,
                 'current_portfolio_value': 110,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             },
             {
                 'date': datetime(2021, 1, 3),
                 'total_deposited': 50,
                 'current_portfolio_value': 60,
-                'transaction_type': ''
+                'transaction_type': 'withdrawal'
             },
             {
                 'date': datetime(2021, 1, 4),
                 'total_deposited': 50,
                 'current_portfolio_value': 54,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             },
             {
                 'date': datetime(2021, 1, 5),
                 'total_deposited': 100,
                 'current_portfolio_value': 104,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 6),
                 'total_deposited': 100,
                 'current_portfolio_value': 119.6,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             }
         ]
         self.test_portfolio.portfolio_history = test_data
@@ -344,43 +346,206 @@ class TimeWeightedReturnCalculatorTests(unittest.TestCase):
                 'date': datetime(2021, 1, 1),
                 'total_deposited': 100,
                 'current_portfolio_value': 100,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 2),
                 'total_deposited': 100,
                 'current_portfolio_value': 80,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             },
             {
                 'date': datetime(2021, 1, 3),
                 'total_deposited': 50,
                 'current_portfolio_value': 30,
-                'transaction_type': ''
+                'transaction_type': 'withdrawal'
             },
             {
                 'date': datetime(2021, 1, 4),
                 'total_deposited': 50,
                 'current_portfolio_value': 27,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             },
             {
                 'date': datetime(2021, 1, 5),
                 'total_deposited': 100,
                 'current_portfolio_value': 77,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             },
             {
                 'date': datetime(2021, 1, 6),
                 'total_deposited': 100,
                 'current_portfolio_value': 78.54,
-                'transaction_type': ''
+                'transaction_type': 'update_portfolio_value'
             }
         ]
         self.test_portfolio.portfolio_history = test_data
         actual_output = self.twr_calculator.calculate_return(self.test_portfolio,
                                                              annualised=False)
         expected_output = -26.56
+        self.assertEqual(actual_output, expected_output)
+
+
+class MoneyWeightedReturnCalculatorTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.test_portfolio = InvestmentPortfolio(name="test_portfolio")
+        self.mwr_calculator = MoneyWeightedReturnCalculator()
+
+    def test_calculate_return_no_data(self):
+        # Test that one or less transaction results in an error
+        with self.assertRaises(ValueError):
+            self.mwr_calculator.calculate_return(self.test_portfolio, annualised=False)
+
+    def test_calculate_return_single_period(self):
+        # Test that a single sub-period reduces to the simple rate of return
+        test_data = [
+            {
+                'date': datetime(2021, 1, 1),
+                'total_deposited': 100,
+                'current_portfolio_value': 100,
+                'transaction_type': 'deposit'
+            },
+            {
+                'date': datetime(2021, 1, 2),
+                'total_deposited': 100,
+                'current_portfolio_value': 110,
+                'transaction_type': 'update_portfolio_value'
+            }
+        ]
+        self.test_portfolio.portfolio_history = test_data
+        actual_output = self.mwr_calculator.calculate_return(self.test_portfolio,
+                                                             annualised=False)
+        expected_output = 10
+        self.assertEqual(actual_output, expected_output)
+
+    def test_calculate_return_deposits_and_withdrawals(self):
+        # Test a multi-period with deposits and withdrawals
+        test_data = [
+            {
+                'date': datetime(2019, 1, 1),
+                'total_deposited': 50,
+                'current_portfolio_value': 50,
+                'transaction_type': 'deposit'
+            },
+            {
+                'date': datetime(2020, 1, 1),
+                'total_deposited': 50,
+                'current_portfolio_value': 52,
+                'transaction_type': 'update_portfolio_value'
+            },
+
+            {
+                'date': datetime(2020, 1, 1),
+                'total_deposited': 48,
+                'current_portfolio_value': 50,
+                'transaction_type': 'withdrawal'
+            },
+            {
+                'date': datetime(2020, 1, 3),
+                'total_deposited': 48,
+                'current_portfolio_value': 67,
+                'transaction_type': 'update_portfolio_value'
+            },
+            {
+                'date': datetime(2021, 1, 4),
+                'total_deposited': 46,
+                'current_portfolio_value': 65,
+                'transaction_type': 'withdrawal'
+            }
+        ]
+        self.test_portfolio.portfolio_history = test_data
+        actual_output = self.mwr_calculator.calculate_return(self.test_portfolio,
+                                                             annualised=False)
+        # Example from: https://www.investopedia.com/terms/m/money-weighted-return.asp
+        expected_output = 11.73
+        self.assertEqual(actual_output, expected_output)
+
+    def test_calculate_return_multi_deposits(self):
+        # Test a multi-period portfolio with deposits only
+        test_data = [
+            {
+                'date': datetime(2020, 1, 1),
+                'total_deposited': 100,
+                'current_portfolio_value': 100,
+                'transaction_type': 'deposit'
+            },
+            {
+                'date': datetime(2020, 3, 1),
+                'total_deposited': 100,
+                'current_portfolio_value': 110,
+                'transaction_type': 'update_portfolio_value'
+            },
+
+            {
+                'date': datetime(2020, 6, 1),
+                'total_deposited': 100,
+                'current_portfolio_value': 150,
+                'transaction_type': 'update_portfolio_value'
+            },
+            {
+                'date': datetime(2020, 1, 3),
+                'total_deposited': 200,
+                'current_portfolio_value': 250,
+                'transaction_type': 'deposit'
+            },
+            {
+                'date': datetime(2021, 1, 4),
+                'total_deposited': 200,
+                'current_portfolio_value': 400,
+                'transaction_type': 'update_portfolio_value'
+            },
+            {
+                'date': datetime(2021, 1, 5),
+                'total_deposited': 300,
+                'current_portfolio_value': 500,
+                'transaction_type': 'deposit'
+            }
+        ]
+        self.test_portfolio.portfolio_history = test_data
+        actual_output = self.mwr_calculator.calculate_return(self.test_portfolio,
+                                                             annualised=False)
+        expected_output = round(irr([-100, -100, -100, 500]) * 100, 2)
+        self.assertEqual(actual_output, expected_output)
+
+    def test_calculate_return_negative_return(self):
+        # Test a multi-period with negative return
+        test_data = [
+            {
+                'date': datetime(2020, 1, 1),
+                'total_deposited': 50,
+                'current_portfolio_value': 50,
+                'transaction_type': 'deposit'
+            },
+            {
+                'date': datetime(2020, 3, 1),
+                'total_deposited': 50,
+                'current_portfolio_value': 30,
+                'transaction_type': 'update_portfolio_value'
+            },
+
+            {
+                'date': datetime(2020, 6, 1),
+                'total_deposited': 100,
+                'current_portfolio_value': 80,
+                'transaction_type': 'deposit'
+            },
+            {
+                'date': datetime(2020, 1, 3),
+                'total_deposited': 100,
+                'current_portfolio_value': 30,
+                'transaction_type': 'update_portfolio_value'
+            },
+            {
+                'date': datetime(2021, 1, 4),
+                'total_deposited': 150,
+                'current_portfolio_value': 80,
+                'transaction_type': 'deposit'
+            }
+        ]
+        self.test_portfolio.portfolio_history = test_data
+        actual_output = self.mwr_calculator.calculate_return(self.test_portfolio,
+                                                             annualised=False)
+        expected_output = round(irr([-50, -50, -50, 80]) * 100, 2)
         self.assertEqual(actual_output, expected_output)
 
 

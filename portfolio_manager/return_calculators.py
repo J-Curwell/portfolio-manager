@@ -1,8 +1,9 @@
 import abc
 from typing import Any, Union
 
-import numpy
+import numpy as np
 import pandas as pd
+from numpy_financial import irr
 
 from portfolio_manager.exceptions import InsufficientData
 from portfolio_manager.portfolio import InvestmentPortfolio
@@ -142,10 +143,60 @@ class TimeWeightedReturnCalculator(ReturnCalculator):
             return_for_period = (end_value - start_value) / start_value
             sub_period_returns.append(return_for_period + 1)
 
-        twr_return_percentage = (numpy.prod(sub_period_returns) - 1) * 100
+        twr_return_percentage = (np.prod(sub_period_returns) - 1) * 100
 
         if annualised:
             twr_return_percentage = self.calculate_annualised_return(
                 portfolio, twr_return_percentage)
 
         return round(twr_return_percentage, 2)
+
+
+class MoneyWeightedReturnCalculator(ReturnCalculator):
+    """
+    Calculate the money-weighted rate of return of a portfolio. This metric takes into
+    account the timing and volume of deposits and withdrawals.
+    """
+
+    def calculate_return(self, portfolio: InvestmentPortfolio,
+                         annualised: bool = True) -> Any:
+        """
+        Calculate the money-weighted rate of return of the portfolio.
+
+        Parameters
+        ----------
+        portfolio : InvestmentPortfolio
+            The portfolio we are calculating the money-weighted return for.
+        annualised : bool
+            If True, calculate the annualised return.
+
+        Returns
+        -------
+        Any : The money-weighted rate of return of the portfolio, as a percentage.
+            e.g. 18 represents 18%.
+        """
+        # If there isn't enough data in the portfolio, raise an error
+        if len(portfolio.portfolio_history) <= 1:
+            raise ValueError('Not enough portfolio data to calculate a return.')
+
+        # Otherwise, calculate the money-weighted return
+        mwr_arr = []
+        df = pd.DataFrame(portfolio.portfolio_history)
+
+        deposits_and_withdrawals_df = df.loc[
+            df['transaction_type'].isin(['deposit', 'withdrawal'])]
+
+        # Get deposit and withdrawal amounts
+        total_deposited_diff = deposits_and_withdrawals_df['total_deposited'].diff()
+
+        mwr_arr.append(-df['total_deposited'][0])
+        mwr_arr.extend(np.negative(list(total_deposited_diff)[1:]))
+        mwr_arr.append(df['current_portfolio_value'].iloc[-1])
+
+        mwr_return_percentage = (irr(mwr_arr)) * 100
+
+        if annualised:
+            mwr_return_percentage = self.calculate_annualised_return(
+                portfolio, mwr_return_percentage)
+
+        return round(mwr_return_percentage, 2)
