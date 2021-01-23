@@ -186,10 +186,10 @@ class MoneyWeightedReturnCalculator(ReturnCalculator):
             df['transaction_type'].isin(['deposit', 'withdrawal'])]
 
         # Get deposit and withdrawal amounts
-        total_despoited_diff_df = deposits_and_withdrawals_df['total_deposited'].diff()
+        total_desposited_diff_df = deposits_and_withdrawals_df['total_deposited'].diff()
 
         mwr_arr.append(-df['total_deposited'][0])
-        mwr_arr.extend(np.negative(list(total_despoited_diff_df)[1:]))
+        mwr_arr.extend(np.negative(list(total_desposited_diff_df)[1:]))
         mwr_arr.append(df['current_portfolio_value'].iloc[-1])
 
         mwr_return_percentage = (irr(mwr_arr)) * 100
