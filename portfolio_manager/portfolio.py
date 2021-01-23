@@ -159,7 +159,7 @@ class InvestmentPortfolio:
     def _backdate_error_check(self, date):
         """ Ensure that the transaction being made isn't being incorrectly back-dated """
         if self.latest_transaction_date is not None:
-            if date < self.latest_transaction_date:
+            if date <= self.latest_transaction_date:
                 raise BackDatingError(
                     f'Attempted transaction: {date}. Latest portfolio transaction: '
                     f'{self.latest_transaction_date}.')
