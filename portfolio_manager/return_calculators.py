@@ -3,7 +3,7 @@ from typing import Any, Union
 
 import numpy
 import pandas as pd
-
+import sys
 from portfolio_manager.portfolio import InvestmentPortfolio
 
 
@@ -158,8 +158,7 @@ class MoneyWeightedReturnCalculator(ReturnCalculator):
 
     def calculate_return(self, portfolio: InvestmentPortfolio,
                          annualised: bool = True) -> Any:
-
-           """
+        """
         Calculate the money-weighted rate of return of the portfolio.
 
         Parameters
@@ -174,27 +173,25 @@ class MoneyWeightedReturnCalculator(ReturnCalculator):
         Any : The money-weighted rate of return of the portfolio, as a percentage.
             e.g. 18 represents 18%.
         """
-                           
+                     
         # If there isn't enough data in the portfolio, raise an error
-        # if len(portfolio.portfolio_history) <= 1:
-        #     raise ValueError('Not enough portfolio data to calculate a return.')
+        if len(portfolio.portfolio_history) <= 1:
+            raise ValueError('Not enough portfolio data to calculate a return.')
 
         # Otherwise, calculate the time-weighted return
         mwr_arr = []
-        df = pd.DataFrame(portfolio.portfolio_history, columns=['total_deposited',
-            'current_portfolio_value', 'transaction_type'])
+        df = pd.DataFrame(portfolio.portfolio_history, columns=['total_deposited', 'current_portfolio_value', 'transaction_type'])
 
-        deposits_and_withdrawals_df = df.loc[df['transaction_type'].isin(['deposit',
-            'withdrawal'])]
+        deposits_and_withdrawals_df = df.loc[df['transaction_type'].isin(['deposit','withdrawal'])]
 
         # Get deposit and withdrawal amounts
-        total_despoited_diff_df = deposits_and_withdrawals_df.loc[:,
-            df.columns.intersection(['total_deposited'])].diff()
+        total_despoited_diff_df = deposits_and_withdrawals_df.loc[:, df.columns.intersection(['total_deposited'])].diff()
 
         mwr_arr.append(-df['total_deposited'][0])
-        mwr_arr.extend(numpy.negative(total_despoited_diff_df['total_deposited'].tolist()))
+        mwr_arr.extend(numpy.negative(total_despoited_diff_df['total_deposited'].tolist()[1:]))
         mwr_arr.append(df['current_portfolio_value'].iloc[-1])
 
+        print(mwr_arr)
         mwr_return_percentage = (numpy.irr(mwr_arr)) * 100
 
         if annualised:
@@ -202,9 +199,3 @@ class MoneyWeightedReturnCalculator(ReturnCalculator):
                 portfolio, mwr_return_percentage)
 
         return round(mwr_return_percentage, 2)
-
-
-
-
-        
-
