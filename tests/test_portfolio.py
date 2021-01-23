@@ -158,8 +158,8 @@ class InvestmentPortfolioTests(unittest.TestCase):
         self.assertIsNone(actual)
 
         # Test that a transaction on the same day doesn't raise an error
-        self.test_portfolio.latest_transaction_date = datetime(2020, 1, 1)
-        actual = self.test_portfolio._backdate_error_check(datetime(2020, 1, 1))
+        self.test_portfolio.latest_transaction_date = datetime(2020, 1, 1, 12)
+        actual = self.test_portfolio._backdate_error_check(datetime(2020, 1, 1, 13))
         self.assertIsNone(actual)
 
         # Test that a transaction in the future doesn't raise an error
