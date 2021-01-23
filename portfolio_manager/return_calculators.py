@@ -179,12 +179,15 @@ class MoneyWeightedReturnCalculator(ReturnCalculator):
 
         # Otherwise, calculate the time-weighted return
         mwr_arr = []
-        df = pd.DataFrame(portfolio.portfolio_history, columns=['total_deposited', 'current_portfolio_value', 'transaction_type'])
+        df = pd.DataFrame(portfolio.portfolio_history, columns=['total_deposited', 
+            'current_portfolio_value', 'transaction_type'])
 
-        deposits_and_withdrawals_df = df.loc[df['transaction_type'].isin(['deposit','withdrawal'])]
+        deposits_and_withdrawals_df = df.loc[df['transaction_type'].isin(['deposit',
+            'withdrawal'])]
 
         # Get deposit and withdrawal amounts
-        total_despoited_diff_df = deposits_and_withdrawals_df.loc[:, df.columns.intersection(['total_deposited'])].diff()
+        total_despoited_diff_df = deposits_and_withdrawals_df.loc[:, 
+            df.columns.intersection(['total_deposited'])].diff()
 
         mwr_arr.append(-df['total_deposited'][0])
         mwr_arr.extend(numpy.negative(total_despoited_diff_df['total_deposited'].tolist()[1:]))
