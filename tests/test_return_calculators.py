@@ -543,7 +543,7 @@ class MoneyWeightedReturnCalculatorTests(unittest.TestCase):
                 'date': datetime(2021, 1, 4),
                 'total_deposited': 150,
                 'current_portfolio_value': 80,
-                'transaction_type': ''
+                'transaction_type': 'deposit'
             }
         ]
         self.test_portfolio.portfolio_history = test_data

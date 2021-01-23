@@ -172,8 +172,7 @@ class MoneyWeightedReturnCalculator(ReturnCalculator):
         -------
         Any : The money-weighted rate of return of the portfolio, as a percentage.
             e.g. 18 represents 18%.
-        """
-                     
+        """                    
         # If there isn't enough data in the portfolio, raise an error
         if len(portfolio.portfolio_history) <= 1:
             raise ValueError('Not enough portfolio data to calculate a return.')
