@@ -382,6 +382,17 @@ class TimeWeightedReturnCalculatorTests(unittest.TestCase):
         expected_output = -26.56
         self.assertEqual(actual_output, expected_output)
 
+    class MoneyWeightedReturnCalculatorTests(unittest.TestCase):
+        def setUp(self) -> None:
+            self.test_portfolio = InvestmentPortfolio(name="test_portfolio")
+            self.mwr_calculator = MoneyWeightedReturnCalculator()
+
+        def test_calculate_return_no_data(self):
+            # Test that one or less transaction results in an error
+            with self.assertRaises(ValueError):
+                self.mwr_calculator.calculate_return(self.test_portfolio, annualised=False)
+
+
 
 if __name__ == '__main__':
     unittest.main()
