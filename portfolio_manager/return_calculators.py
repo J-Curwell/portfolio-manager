@@ -3,7 +3,6 @@ from typing import Any, Union
 
 import numpy
 import pandas as pd
-import sys
 from portfolio_manager.portfolio import InvestmentPortfolio
 
 
