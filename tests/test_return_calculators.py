@@ -18,25 +18,25 @@ class ReturnCalculatorsTests(unittest.TestCase):
     def test_calculate_annualised_return(self):
         # Test a portfolio age of < 1
         mock_rc = MagicMock()
-        mock_rc.get_portfolio_age.return_value = 0.9
+        mock_rc._get_portfolio_age.return_value = 0.9
         actual = ReturnCalculator.calculate_annualised_return(mock_rc, 'test', 13)
-        mock_rc.get_portfolio_age.assert_called_once_with('test')
+        mock_rc._get_portfolio_age.assert_called_once_with('test')
         expected = 14.54
         self.assertEqual(expected, actual)
 
         # Test a portfolio age of 1
         mock_rc = MagicMock()
-        mock_rc.get_portfolio_age.return_value = 1
+        mock_rc._get_portfolio_age.return_value = 1
         actual = ReturnCalculator.calculate_annualised_return(mock_rc, 'test', -11)
-        mock_rc.get_portfolio_age.assert_called_once_with('test')
+        mock_rc._get_portfolio_age.assert_called_once_with('test')
         expected = -11
         self.assertEqual(expected, actual)
 
         # Test a portfolio age of > 1
         mock_rc = MagicMock()
-        mock_rc.get_portfolio_age.return_value = 2.5
+        mock_rc._get_portfolio_age.return_value = 2.5
         actual = ReturnCalculator.calculate_annualised_return(mock_rc, 'test', 120)
-        mock_rc.get_portfolio_age.assert_called_once_with('test')
+        mock_rc._get_portfolio_age.assert_called_once_with('test')
         expected = 37.08
         self.assertEqual(expected, actual)
 
@@ -51,8 +51,8 @@ class ReturnCalculatorsTests(unittest.TestCase):
             }
         ]
         self.test_portfolio.portfolio_history = test_data
-        actual = ReturnCalculator.get_portfolio_age(self.test_portfolio)
-        self.assertEqual(0.5, actual)
+        actual = ReturnCalculator._get_portfolio_age(self.test_portfolio)
+        self.assertEqual(0.5, round(actual, 2))
 
     def test_get_portfolio_age_medium(self):
         # Test a portfolio of age 1 year
@@ -68,8 +68,8 @@ class ReturnCalculatorsTests(unittest.TestCase):
             }
         ]
         self.test_portfolio.portfolio_history = test_data
-        actual = ReturnCalculator.get_portfolio_age(self.test_portfolio)
-        self.assertEqual(1, actual)
+        actual = ReturnCalculator._get_portfolio_age(self.test_portfolio)
+        self.assertEqual(1, round(actual, 2))
 
     def test_get_portfolio_age_longer(self):
         # Test a portfolio of age > 1 year
@@ -88,8 +88,8 @@ class ReturnCalculatorsTests(unittest.TestCase):
             }
         ]
         self.test_portfolio.portfolio_history = test_data
-        actual = ReturnCalculator.get_portfolio_age(self.test_portfolio)
-        self.assertEqual(2.17, actual)
+        actual = ReturnCalculator._get_portfolio_age(self.test_portfolio)
+        self.assertEqual(2.17, round(actual, 2))
 
 
 class SimpleReturnCalculatorTests(unittest.TestCase):
