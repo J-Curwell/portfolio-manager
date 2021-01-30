@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="James Curwell -- George Calvert",
     author_email="jamescurwell97@gmail.com",
-    description="Simple tool for monitoring investment portfolio performance",
+    description="Simple tool for monitoring the performance of investment portfolios.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/J-Curwell/portfolio-manager",
