@@ -21,13 +21,13 @@ class ReturnCalculator(abc.ABC):
         Given the overall return percentage of a portfolio, calculate the annualised
         return percentage.
         """
-        portfolio_age = self.get_portfolio_age(portfolio)
+        portfolio_age = self._get_portfolio_age(portfolio)
         annualised_return = (1 + total_return_percentage / 100) ** (1 / portfolio_age)
         annualised_return_percentage = (annualised_return - 1) * 100
         return round(annualised_return_percentage, 2)
 
     @staticmethod
-    def get_portfolio_age(portfolio: InvestmentPortfolio) -> Union[int, float]:
+    def _get_portfolio_age(portfolio: InvestmentPortfolio) -> Union[int, float]:
         """
         Calculate the 'age' of a portfolio. This is the number of years between the
         first transaction in the portfolio and the most recent one.
@@ -47,8 +47,8 @@ class ReturnCalculator(abc.ABC):
         end = portfolio.portfolio_history[-1]['date']
         delta = end - start
 
-        # Return the portfolio age in years, rounded to the nearest 2 d.p's
-        return round(delta.days / 365, 2)
+        # Return the portfolio age, in years
+        return delta.days / 365.25
 
 
 class SimpleReturnCalculator(ReturnCalculator):
