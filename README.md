@@ -1,6 +1,6 @@
 # portfolio-manager
 
-A simple tool for tracking and analysing the performance of an investment portfolio.
+A simple tool for tracking and analysing the performance of investment portfolios.
 
 ## Features and Usage
 
