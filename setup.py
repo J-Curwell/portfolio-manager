@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="portfolio-manager",
-    version="0.0.1",
+    version="0.0.2",
     license="MIT",
     author="James Curwell -- George Calvert",
     author_email="jamescurwell97@gmail.com",
@@ -21,5 +21,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
+    install_requires=['pandas', 'numpy', 'numpy-financial'],
     test_suite="tests"
 )
