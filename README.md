@@ -14,7 +14,7 @@ user’s portfolios. These methods include a simple percentage return calculator
 more sophisticated time-weighted return calculator.
 
 Example usage of the package can be found in the Jupyter Notebooks within 
-portfolio-manager/notebooks in the GitHub repo (link below).
+portfolio-manager/notebooks, in the GitHub repo (link below).
 
 ## Installation
 
@@ -26,7 +26,7 @@ Package Index (PyPI)](https://pypi.org/project/portfolio-manager/).
 
 ```sh
 # PyPI
-pip install pandas
+pip install portfolio-manager
 ```
 
 ## License
