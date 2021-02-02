@@ -143,7 +143,7 @@ class TimeWeightedReturnCalculator(ReturnCalculator):
             return_for_period = (end_value - start_value) / start_value
             sub_period_returns.append(return_for_period + 1)
 
-        twr_return_percentage = (np.prod(sub_period_returns) - 1) * 100
+        twr_return_percentage = (np.product(sub_period_returns) - 1) * 100
 
         if annualised:
             twr_return_percentage = self.calculate_annualised_return(
